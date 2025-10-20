@@ -1,0 +1,63 @@
+{
+  "schemaVersion": 1,
+  "badges": [
+    {
+      "id": "first_players",
+      "title": "Be among the first players",
+      "short": "Founder",
+      "desc": "Played during the first 6 months after launch.",
+      "icon": "first_players",
+      "rarity": "Epic",
+      "tags": ["profileLoaded", "runComplete"],
+      "rule": {
+        "type": "timeWindow",
+        "anchor": "LAUNCH_EPOCH",
+        "durationDays": 180,
+        "and": { "type": "threshold", "metric": "runs_completed", "op": ">=", "value": 1 }
+      }
+    },
+    {
+      "id": "runs_1",
+      "title": "Laced Up",
+      "desc": "Complete your first run.",
+      "icon": "runs_1",
+      "rarity": "Common",
+      "tags": ["runComplete"],
+      "rule": { "type": "threshold", "metric": "runs_completed", "op": ">=", "value": 1 },
+      "progress": { "numerator": "runs_completed", "denominator": 1 }
+    },
+    {
+      "id": "runs_10",
+      "title": "Head Start",
+      "desc": "Complete 10 runs.",
+      "icon": "runs_10",
+      "rarity": "Common",
+      "tags": ["runComplete"],
+      "rule": { "type": "threshold", "metric": "runs_completed", "op": ">=", "value": 10 },
+      "progress": { "numerator": "runs_completed", "denominator": 10 }
+    },
+    {
+      "id": "runs_50",
+      "title": "Full Stride",
+      "desc": "Complete 50 runs.",
+      "icon": "runs_50",
+      "rarity": "Rare",
+      "tags": ["runComplete"],
+      "rule": { "type": "threshold", "metric": "runs_completed", "op": ">=", "value": 50 },
+      "progress": { "numerator": "runs_completed", "denominator": 50 }
+    },
+    {
+      "id": "runs_100",
+      "title": "Take Flight",
+      "desc": "Complete 100 runs.",
+      "icon": "runs_100",
+      "rarity": "Epic",
+      "tags": ["runComplete"],
+      "rule": { "type": "threshold", "metric": "runs_completed", "op": ">=", "value": 100 },
+      "progress": { "numerator": "runs_completed", "denominator": 100 }
+    }
+  ],
+  "constants": {
+    "LAUNCH_EPOCH": 1735689600000
+  }
+}

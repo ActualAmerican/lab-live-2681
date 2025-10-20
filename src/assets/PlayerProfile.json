@@ -1,0 +1,40 @@
+{
+  "version": 2,
+  "playerName": "Player",
+  "avatarSeed": 0,
+  "favoriteShapes": [],
+  "coins": 0,
+  "gems": 0,
+  "xp": 0,
+  "bestScore": 0,
+  "bests": {
+    "score": 0,
+    "longestRunSec": 0,
+    "fastestRunSec": 0,
+    "mostShapesInRun": 0,
+    "highestLevel": 0,
+    "bestRun": null
+  },
+  "unlocks": { "shapes": [], "skins": [], "powerUps": [] },
+  "settings": {
+    "volume": 1,
+    "colorblind": false,
+    "reducedMotion": false,
+    "haptics": true,
+    "wowMode": false,
+    "showInstallBanner": true,
+    "showQR": true
+  },
+  "streak": { "daily": 0, "lastDate": null, "weeklyForgiveness": 1 },
+  "stats": {
+    "lifetime": {
+      "runsStarted": 0,
+      "runsCompleted": 0,
+      "playTimeSec": 0,
+      "shapesCompleted": 0
+    },
+    "perShape": {}
+  },
+  "recentRuns": [],
+  "_meta": { "createdAt": 0, "updatedAt": 0 }
+}

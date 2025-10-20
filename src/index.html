@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ShapeShifters</title>
+    <link rel="stylesheet" href="styles.css" />
+    <link rel="icon" href="data:," />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Aldrich&family=Audiowide&family=Barlow+Condensed:wght@500;700&family=Chakra+Petch:wght@600;700&family=Exo+2:wght@600;700&family=Orbitron:wght@600;700&family=Oxanium:wght@600;700&family=Press+Start+2P&family=Quantico:wght@700&family=Rajdhani:wght@600;700&family=Roboto+Condensed:wght@700&family=Share+Tech+Mono&family=Teko:wght@600;700&family=VT323&display=swap"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <!-- background layers -->
+    <canvas id="titleBgCanvas"></canvas>
+    <canvas id="menuBgCanvas"></canvas>
+    <canvas id="starfieldCanvas"></canvas>
+
+    <!-- game layer -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- router UI overlay -->
+    <div id="router-root" class="router-root"></div>
+
+    <!-- optional debug overlay -->
+    <div id="scoreboardCanvas"></div>
+
+    <!-- transient toasts -->
+    <div id="toast-root" class="toast-root" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- background scripts -->
+    <script type="module" src="./shapeFlow.js"></script>
+    <script type="module" src="./menuBackground.js"></script>
+    <script type="module" src="./starfield.js"></script>
+
+    <!-- app entry (only this initializes UI/router) -->
+    <script>
+      window.__DEV__ = true;
+    </script>
+    <script>
+      // dev-only features (debug menu + hotkeys)
+      window.__DEV__ = true;
+    </script>
+    <script type="module" src="./main.js"></script>
+  </body>
+</html>

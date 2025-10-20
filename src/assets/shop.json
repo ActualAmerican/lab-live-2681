@@ -1,0 +1,95 @@
+{
+  "version": 2,
+
+  "featured": {
+    "from": ["skins", "trails", "boosters"],
+    "pick": 6,
+    "exclude": ["skins:Default"]
+  },
+
+  "rotations": {
+    "daily": {
+      "trails": { "pick": 1 },
+      "boosters": { "pick": 2 }
+    },
+    "weekly": {
+      "skins": { "pick": 6, "exclude": ["Default"] }
+    }
+  },
+
+  "catalog": {
+    "skins": [
+      {
+        "id": "Default",
+        "name": "Default",
+        "price": { "copper": 0 },
+        "unlock": "always",
+        "module": "../assets/skins/Default.js"
+      },
+      {
+        "id": "Neon",
+        "name": "Neon",
+        "price": { "copper": 700 },
+        "unlock": "always",
+        "module": "../assets/skins/Neon.js",
+        "notes": "Vibrant outline glow."
+      },
+      {
+        "id": "CarbonFiber",
+        "name": "Carbon Fiber",
+        "price": { "copper": 1200 },
+        "unlock": "always",
+        "module": "../assets/skins/CarbonFiber.js",
+        "notes": "Subtle weave; sleek."
+      }
+    ],
+
+    "trails": [
+      {
+        "id": "LightStreak",
+        "name": "Light Streak",
+        "price": { "copper": 300 },
+        "unlock": "always",
+        "notes": "Clean streak behind shape."
+      },
+      {
+        "id": "SparkTail",
+        "name": "Spark Tail",
+        "price": { "copper": 450 },
+        "unlock": "always",
+        "notes": "Short sparkly tail."
+      }
+    ],
+
+    "boosters": [
+      {
+        "id": "TimeSlow",
+        "name": "Time Slow (x1)",
+        "consumable": true,
+        "price": { "copper": 200, "iridium": 10 },
+        "unlock": "always",
+        "notes": "Temporarily slow timer."
+      },
+      {
+        "id": "ScoreBoost",
+        "name": "Score Boost (x1)",
+        "consumable": true,
+        "price": { "copper": 350 },
+        "unlock": "always",
+        "notes": "+25% Score this level."
+      }
+    ],
+
+    "shapes": [
+      {
+        "id": "Butterfly",
+        "name": "Butterfly",
+        "price": { "copper": 5000, "xp": 25000 },
+        "unlock": "catalog",
+        "notes": "Also unlockable via milestone."
+      }
+    ],
+
+    "jukebox": []
+  }
+}

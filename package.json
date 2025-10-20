@@ -1,0 +1,21 @@
+{
+  "name": "shapeshifters",
+  "version": "1.0.0",
+  "description": "/project-root\r │\r ├── README.md                    # Project notes, dev roadmap, GDD link\r │\r ├── /src\r │   ├── index.html               # HTML entry point (in /src)\r │   ├── styles.css               # Global CSS styling (in /src)\r │   ├── main.js                  # Bootstrap, global event hooks, game loop\r │   ├── ShapeManager.js          # Controls which shape is active, level rotation, fail conditions\r │   ├── starfield.js             # Music-reactive starfield background layer\r │\r │   ├── /shapes\r │   │   ├── Shape.js             # Parent base class for all shapes\r │   │   ├── shapes.js            # Shape registry + rotation array logic\r │   │   ├── Circle.js\r │   │   ├── Square.js\r │   │   ├── Kite.js\r │   │   ├── Heart.js\r │   │   ├── Arrow.js\r │   │   ├── Pentagon.js\r │   │   ├── Triangle.js\r │   │   ├── Trapezoid.js\r │   │   ├── CrescentMoon.js\r │   │   ├── Octagon.js\r │   │   ├── Snowflake.js\r │   │   ├── Butterfly.js\r │   │   ├── Feather.js\r │   │   ├── Hourglass.js\r │   │   ├── Angel.js\r │   │   ├── Star.js\r │   │   ├── Gear.js\r │   │   ├── Key.js\r │   │   ├── PuzzlePiece.js\r │   │   ├── Spiral.js\r │   │   ├── Flower.js\r │   │   ├── Sun.js\r │   │   ├── IceCream.js\r │   │   ├── MusicNote.js\r │   │   ├── Shapeless.js\r │\r │   ├── /libs\r │   │   ├── ShapeLibrary.js     # Central base colors, speeds, level weights for all shapes\r │   │   ├── SkinLibrary.js      # Defines all skin packs, mask overlays, rendering logic\r │   │   ├── AudioLibrary.js     # Maps shape names to tap/combo/fail SFX, BGM tracks\r │   │   ├── FXLibrary.js        # Shared particles, intro/outro shine, trails — reusable\r │   │   ├── PowerUpLibrary.js   # All power-up types, costs, timers, shop logic\r │\r │   ├── /ui\r │   │   ├── MainMenu.js         # Title screen, navigation to modes, shop, profile, settings\r │   │   ├── Hotbar.js           # Power-up slots, tap/hold activation, cooldown visuals\r │   │   ├── HUD.js              # In-game score, XP, combo counter, revive offer\r │   │   ├── Shop.js             # In-game store for skins, trails, power-ups\r │   │   ├── Profile.js          # Player mastery progress, badges, high score journal\r │   │   ├── GoalTracker.js      # Daily & weekly goal challenges\r │   │   ├── Settings.js         # Audio, haptics, language toggle (future-ready)\r │   │   ├── RevivePopup.js      # Display revive option on fail\r │\r │   ├── /assets\r │   │   ├── /images/            # Vector shapes, shading overlays, trail sprites, particles\r │   │   ├── /audio/             # SFX + BGM tracks\r │   │   ├── shop.json           # JSON config for seasonal shop rotations\r │   │   ├── ShapeSpecs.md       # Developer doc: per-shape mechanics for all levels\r │   │   ├── PlayerProfile.json  # Local save: XP, mastery, high score journal",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "mirror": "node mirror-live.js",
+    "mirror:on": "powershell -NoProfile -Command \"Start-Process node -ArgumentList 'mirror-live.js' -WindowStyle Minimized -PassThru | Select-Object -ExpandProperty Id | Set-Content .mirror-pid\"",
+    "mirror:on:poll": "powershell -NoProfile -Command \"Start-Process node -ArgumentList 'mirror-live.js --poll' -WindowStyle Minimized -PassThru | Select-Object -ExpandProperty Id | Set-Content .mirror-pid\"",
+    "mirror:off": "powershell -NoProfile -Command \"if (Test-Path .mirror-pid) { $mirrorPid = Get-Content .mirror-pid | Select-Object -First 1; $proc = Get-Process -Id $mirrorPid -ErrorAction SilentlyContinue; if ($proc) { Stop-Process -Id $mirrorPid -Force }; Remove-Item .mirror-pid -Force } else { Write-Host 'Mirror not running (no .mirror-pid)'; }\"",
+    "mirror:off:scan": "powershell -NoProfile -Command \"$procs = Get-CimInstance Win32_Process | Where-Object { $_.CommandLine -match 'mirror-live.js' }; if ($procs) { $procs.ProcessId | ForEach-Object { Stop-Process -Id $_ -Force }; Write-Host 'Stopped mirror-live.js process(es).' } else { Write-Host 'No mirror-live.js process found.' }; if (Test-Path .mirror-pid) { Remove-Item .mirror-pid -Force }\""
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "chokidar": "^4.0.3",
+    "fs-extra": "^11.3.2"
+  }
+}

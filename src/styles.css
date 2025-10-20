@@ -1,0 +1,2119 @@
+body {
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #000;
+  overflow: hidden;
+  position: relative;
+}
+
+#starfieldCanvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+#gameCanvas {
+  background-color: transparent;
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+}
+
+#scoreboardCanvas {
+  position: absolute;
+  z-index: 1;
+  background: transparent;
+  display: none;
+}
+
+/* dev-only id hooks, harmless when not present */
+#debugMenu {
+  /* Safari iOS + macOS need the prefix */
+  -webkit-backdrop-filter: blur(2px);
+  /* Other modern browsers */
+  backdrop-filter: blur(2px);
+}
+#debugToggleBtn {
+  cursor: pointer;
+}
+
+/* ── Router/Screens (B.1) ─────────────────────────────────────────────── */
+#router-root.router-root {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: auto;
+}
+#router-root.is-hidden {
+  display: none;
+}
+
+.screen {
+  color: #fff;
+  font-family: Orbitron, system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.6);
+}
+.screen--title .title-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 18px;
+}
+.title-logo {
+  font: 700 42px Orbitron, sans-serif;
+  letter-spacing: 1px;
+}
+.press-any {
+  font: 600 16px Roboto, system-ui, sans-serif;
+  opacity: 0.85;
+  animation: pulse 1.6s ease-in-out infinite;
+}
+@keyframes pulse {
+  0% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1px);
+  }
+  100% {
+    opacity: 0.25;
+    transform: translateY(0);
+  }
+}
+
+.screen--main .menu-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 280px));
+  gap: 16px;
+}
+.menu-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  padding: 18px 22px;
+  border-radius: 16px;
+  font: 700 18px Orbitron, sans-serif;
+  color: #fff;
+  cursor: pointer;
+  transition: transform 0.12s, background 0.12s, border-color 0.12s;
+}
+.menu-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.menu-card--primary {
+  grid-column: span 2;
+  font-size: 22px;
+  padding: 22px 24px;
+}
+.menu-footer {
+  margin-top: 18px;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  font: 600 12px Roboto, system-ui, sans-serif;
+  opacity: 0.8;
+}
+.qr-stub {
+  opacity: 0.7;
+}
+
+.screen--panel .panel {
+  min-width: 520px;
+  max-width: 720px;
+  background: rgba(0, 0, 0, 0.5);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+  border-radius: 16px;
+  padding: 14px;
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 10px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+.panel-header h2 {
+  margin: 0;
+  font: 800 22px Orbitron, sans-serif;
+}
+.back-btn {
+  font: 700 13px Orbitron, sans-serif;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+}
+.panel-body {
+  padding: 12px 4px;
+  font: 500 14px Roboto, system-ui, sans-serif;
+  opacity: 0.9;
+}
+
+/* Fades */
+#router-root.fade-in {
+  animation: fadeInScale 0.18s ease;
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#router-root.fade-out {
+  animation: fadeOut 0.14s ease;
+}
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
+/* ── Soft Neon Glass: Title/Main polish ─────────────────────────── */
+
+/* Screen vignettes (stronger on Title, softer on Main, none in Game) */
+#router-root::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(
+    60% 40% at 50% 50%,
+    rgba(255, 255, 255, 0.08) 0%,
+    rgba(255, 255, 255, 0.05) 25%,
+    rgba(0, 0, 0, 0) 60%
+  );
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+body[data-screen='title'] #router-root::before {
+  opacity: 0.7;
+}
+body[data-screen='main'] #router-root::before {
+  opacity: 0.45;
+}
+body[data-screen='game'] #router-root::before {
+  opacity: 0;
+}
+
+/* Title logo: halo + moving glint */
+.title-logo {
+  position: relative;
+  font: 800 48px Orbitron, system-ui, sans-serif;
+  letter-spacing: 1.5px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.15), 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+.title-logo .title-text {
+  position: relative;
+  z-index: 1;
+}
+.title-logo .title-halo {
+  position: absolute;
+  z-index: 0;
+  inset: -36px -48px;
+  background: radial-gradient(
+    50% 50% at 50% 50%,
+    rgba(255, 255, 255, 0.18) 0%,
+    rgba(140, 180, 255, 0.1) 35%,
+    rgba(0, 0, 0, 0) 70%
+  );
+  filter: blur(8px);
+  opacity: 0.65;
+}
+.title-logo .title-glint {
+  position: absolute;
+  z-index: 2;
+  top: 50%;
+  left: -25%;
+  width: 120px;
+  height: 34px;
+  transform: translateY(-50%) rotate(18deg);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.95) 48%,
+    rgba(255, 255, 255, 0) 100%
+  );
+  filter: blur(1px);
+  opacity: 0;
+  mix-blend-mode: screen;
+  animation: glint 7.2s ease-in-out infinite;
+}
+@keyframes glint {
+  0% {
+    left: -25%;
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  46% {
+    left: 110%;
+    opacity: 0;
+  }
+  100% {
+    left: 110%;
+    opacity: 0;
+  }
+}
+
+/* Press Any: cleaner pulse */
+.press-any {
+  font: 600 15px Roboto, system-ui, sans-serif;
+  letter-spacing: 0.4px;
+  opacity: 0.9;
+  animation: pressPulse 1.8s ease-in-out infinite;
+}
+@keyframes pressPulse {
+  0% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+  50% {
+    opacity: 1;
+    transform: translateY(-1.5px);
+  }
+  100% {
+    opacity: 0.35;
+    transform: translateY(0);
+  }
+}
+
+/* Glass cards: subtle neon edge + hover lift */
+.screen--main .menu-grid {
+  row-gap: 18px;
+}
+.menu-card {
+  position: relative;
+  background: linear-gradient(to bottom, rgba(255, 255, 255, 0.1), rgba(255, 255, 255, 0.04));
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  backdrop-filter: blur(6px) saturate(110%);
+  -webkit-backdrop-filter: blur(6px) saturate(110%);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.35), inset 0 1px 0 rgba(255, 255, 255, 0.18),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.06);
+  transform: translateY(0) scale(1);
+  transition: transform 0.14s ease, box-shadow 0.14s ease, background 0.14s ease;
+}
+.menu-card::after {
+  content: '';
+  pointer-events: none;
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  box-shadow: 0 0 12px rgba(140, 180, 255, 0.25), 0 0 24px rgba(140, 180, 255, 0.12);
+  opacity: 0;
+  transition: opacity 0.14s ease;
+}
+.menu-card:hover,
+.menu-card:focus-visible {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 16px 34px rgba(0, 0, 0, 0.42), inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+.menu-card:hover::after,
+.menu-card:focus-visible::after {
+  opacity: 0.85;
+}
+.menu-card--primary {
+  font-size: 22px;
+  padding: 22px 24px;
+}
+
+/* Subtle entrance for menu */
+body[data-screen='main'] .menu-card {
+  animation: cardIn 0.26s cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+body[data-screen='main'] .menu-card:nth-child(1) {
+  animation-delay: 0s;
+}
+body[data-screen='main'] .menu-card:nth-child(2) {
+  animation-delay: 0.03s;
+}
+body[data-screen='main'] .menu-card:nth-child(3) {
+  animation-delay: 0.06s;
+}
+body[data-screen='main'] .menu-card:nth-child(4) {
+  animation-delay: 0.09s;
+}
+@keyframes cardIn {
+  from {
+    opacity: 0;
+    transform: translateY(6px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Accessibility / Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+  #router-root.fade-in,
+  #router-root.fade-out {
+    animation: none !important;
+  }
+  .title-logo .title-glint,
+  .press-any,
+  .menu-card {
+    animation: none !important;
+  }
+  .menu-card,
+  #router-root {
+    transform: none !important;
+    transition: none !important;
+  }
+}
+
+/* Background canvas layers */
+#titleBgCanvas,
+#menuBgCanvas,
+#starfieldCanvas {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  transition: opacity 0.35s ease;
+}
+
+/* Layer order */
+#titleBgCanvas {
+  z-index: -3;
+  opacity: 0;
+}
+#menuBgCanvas {
+  z-index: -2;
+  opacity: 0;
+}
+#starfieldCanvas {
+  z-index: -1;
+} /* game canvas fades separately */
+
+/* Show/Hide by router state */
+body[data-screen='title'] #titleBgCanvas {
+  opacity: 1;
+}
+body[data-screen='main'] #menuBgCanvas {
+  opacity: 1;
+}
+body:not([data-screen='game']) #starfieldCanvas {
+  opacity: 0;
+}
+body[data-screen='game'] #starfieldCanvas {
+  opacity: 1;
+}
+
+/* ── Profile polish ───────────────────────────────────────────── */
+.profile-panel {
+  max-width: 980px;
+  width: min(92vw, 980px);
+}
+.profile-body .row {
+  margin-top: 14px;
+}
+
+/* Identity */
+.id-wrap {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font: 800 16px Orbitron, sans-serif;
+  background: radial-gradient(120% 120% at 0% 0%, #67f 0%, #48a 55%, #236 100%);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.25), 0 2px 8px rgba(0, 0, 0, 0.5);
+}
+.id-lines .sub {
+  font: 600 12px Roboto, system-ui, sans-serif;
+  opacity: 0.7;
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn {
+  font: 700 13px Orbitron, sans-serif;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+}
+
+/* Currency strip */
+.currency-strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.pill {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  font: 700 14px Orbitron, sans-serif;
+}
+.icon {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  border-radius: 3px;
+}
+.icon.coin {
+  background: radial-gradient(circle at 30% 30%, #ffd56a, #b68b00);
+  border-radius: 50%;
+}
+.icon.gem {
+  background: linear-gradient(135deg, #7ff, #08c);
+  clip-path: polygon(50% 0, 100% 35%, 75% 100%, 25% 100%, 0 35%);
+}
+.icon.xp {
+  background: linear-gradient(135deg, #c8f, #84c);
+}
+.icon.trophy {
+  background: linear-gradient(135deg, #f9c, #f36);
+}
+
+/* Level bar */
+.level-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+.level-left {
+  min-width: 160px;
+}
+.level-title {
+  font: 800 16px Orbitron, sans-serif;
+}
+.level-sub {
+  font: 600 12px Roboto, system-ui, sans-serif;
+}
+.level-bar {
+  flex: 1;
+  height: 14px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+}
+.level-bar .bar {
+  height: 100%;
+  background: linear-gradient(90deg, #7cf, #4af);
+}
+
+/* Chips */
+.chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.chip {
+  min-width: 140px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.chip .k {
+  font: 700 12px Orbitron, sans-serif;
+  opacity: 0.85;
+}
+.chip .v {
+  font: 800 18px Orbitron, sans-serif;
+}
+
+/* Grid layout for Mastery + Recent */
+.grid.two {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+.card {
+  padding: 12px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.card-title {
+  font: 800 14px Orbitron, sans-serif;
+  opacity: 0.9;
+  margin-bottom: 8px;
+}
+
+/* Mastery grid cards */
+.mastery-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+}
+.m-card {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+.m-name {
+  font: 800 12px Orbitron, sans-serif;
+  opacity: 0.92;
+  margin-bottom: 4px;
+}
+.m-row {
+  display: flex;
+  justify-content: space-between;
+  font: 600 12px Roboto, sans-serif;
+  opacity: 0.85;
+}
+.m-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  margin-top: 6px;
+  position: relative;
+  overflow: hidden;
+}
+.m-bar i {
+  position: absolute;
+  inset: 0;
+  width: 0;
+  background: linear-gradient(90deg, #7df, #4bf);
+}
+.m-pct {
+  text-align: right;
+  font: 700 11px Roboto, sans-serif;
+  opacity: 0.8;
+  margin-top: 2px;
+}
+
+/* Recent runs */
+.recent-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.recent-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font: 600 12px Roboto, system-ui, sans-serif;
+  opacity: 0.9;
+}
+.recent-row .sp {
+  opacity: 0.5;
+}
+/* trend coloring for Trends card + Recent list */
+.trend.up {
+  color: #78f08a;
+} /* green */
+.trend.down {
+  color: #ff6d6d;
+} /* red */
+.trend.flat {
+  color: rgba(255, 255, 255, 0.72);
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .grid.two {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Rank emblem row */
+.rank-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 6px;
+}
+.rank-meta {
+  display: flex;
+  flex-direction: column;
+}
+
+.rank-emblem {
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(
+    120% 120% at 0% 0%,
+    rgba(140, 180, 255, 0.35) 0%,
+    rgba(60, 90, 150, 0.35) 55%,
+    rgba(20, 30, 60, 0.6) 100%
+  );
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 2px 10px rgba(0, 0, 0, 0.5);
+}
+.rank-emblem span {
+  font: 800 18px Orbitron, sans-serif;
+  letter-spacing: 0.5px;
+  color: #fff;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.6);
+}
+
+/* ===== Vault ===== */
+.vault-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px;
+}
+.vault-tile {
+  position: relative;
+  padding: 12px;
+  border-radius: 14px;
+  cursor: pointer;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  text-align: center;
+  transition: transform 0.12s ease, background 0.2s ease;
+}
+.vault-tile:hover {
+  transform: translateY(-1px);
+  background: rgba(255, 255, 255, 0.08);
+}
+/* Locked: keep card readable; only the icon is blurred/greyed */
+.vault-tile.is-locked {
+  opacity: 1; /* leave the tile + "???" text crisp */
+}
+.vault-tile.is-locked .tile-name {
+  opacity: 0.9;
+}
+/* Heavier blur + locked to a single grey tone */
+.vault-tile.is-locked .tile-icon {
+  position: relative;
+  /* collapse all color/contrast, darken a hair, and blur more */
+  filter: grayscale(1) contrast(0) brightness(0.65) blur(4px);
+  opacity: 1;
+}
+.vault-tile.is-locked .tile-icon::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: 12px;
+  background: rgba(170, 170, 170, 0.42);
+  pointer-events: none;
+}
+.vault-tile.is-fav::after {
+  content: '★';
+  position: absolute;
+  top: 8px;
+  right: 10px;
+  font-size: 14px;
+  opacity: 0.9;
+}
+.vault-tile .tile-icon {
+  width: 72px;
+  height: 72px;
+  margin: 6px auto 4px;
+  border-radius: 12px;
+  background: transparent !important; /* transparent plate */
+  box-shadow: none !important; /* remove inner stroke */
+}
+
+.vault-tile .tile-name {
+  font: 700 13px Orbitron, sans-serif;
+  opacity: 0.92;
+}
+
+/* Simple modal used by Vault detail */
+.modal {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(0, 0, 0, 0.55);
+  z-index: 30;
+}
+.modal-card {
+  width: min(520px, 90vw);
+  background: rgba(0, 0, 0, 0.7);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 16px;
+  padding: 14px;
+}
+.modal-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+.modal-title {
+  font: 800 18px Orbitron, sans-serif;
+}
+.modal-body {
+  display: grid;
+  grid-template-columns: 120px 1fr;
+  gap: 16px;
+  align-items: center;
+}
+.shape-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 16px;
+  background: var(--tile-color, #999);
+}
+.kv > div {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+}
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+/* Vault canvas icons */
+.vault-grid .tile-icon {
+  width: 72px;
+  height: 72px;
+  display: block;
+  margin: 6px auto 4px;
+}
+.screen-header .small {
+  font: 600 12px Roboto, system-ui, sans-serif;
+  opacity: 0.7;
+}
+
+/* Vault icon tile: make the thumbnail background transparent */
+.shape-card .thumb,
+.vault-card .thumb,
+.vault-grid .thumb {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* Vault shape tiles: make icon canvas truly transparent and add a subtle pop */
+.shape-canvas {
+  background: transparent !important;
+}
+
+.shape-canvas {
+  filter: drop-shadow(0 1px 0 rgba(255, 255, 255, 0.04)) drop-shadow(0 6px 10px rgba(0, 0, 0, 0.25));
+}
+
+/* Vault icon plates: make the plate fully transparent */
+.vault-grid .thumb,
+.vault-grid .iconPlate,
+.vault-card .thumb,
+.vault-card .iconPlate {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+/* Ensure the canvas itself is transparent too */
+.vault-grid canvas,
+.vault-card canvas {
+  background: transparent !important;
+}
+
+/* Vault icon canvas must be fully transparent */
+.vault-grid canvas,
+.vault-card canvas,
+.shape-canvas {
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+/* The little “plate” behind icons should be transparent everywhere */
+.vault-tile .tile-icon,
+.shape-card .thumb,
+.vault-card .thumb,
+.vault-grid .thumb,
+.vault-grid .iconPlate {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: 0 !important;
+}
+
+.icon.star {
+  background: radial-gradient(circle at 50% 45%, #ffd67a, #b88b00);
+  clip-path: polygon(
+    50% 0%,
+    61% 35%,
+    98% 35%,
+    68% 57%,
+    79% 91%,
+    50% 72%,
+    21% 91%,
+    32% 57%,
+    2% 35%,
+    39% 35%
+  );
+}
+/* ── Profile: Mastery badges ───────────────────────────────────────── */
+.profile__badges {
+  margin: 16px 0 8px;
+}
+.profile__badges-title {
+  font: 600 12px Inter, system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+  margin-bottom: 8px;
+}
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(56px, 1fr));
+  gap: 10px;
+}
+.badge {
+  position: relative;
+  height: 56px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+}
+.badge__icon {
+  font-size: 24px;
+  line-height: 1;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.35));
+}
+.badge.is-locked {
+  filter: grayscale(1) opacity(0.6);
+}
+.badge.is-earned {
+  border-color: rgba(255, 255, 255, 0.28);
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.05) inset, 0 0 16px rgba(255, 255, 255, 0.06);
+}
+.badge__progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, #7ef 0%, #9f7 100%);
+  transition: width 0.25s ease;
+}
+
+/* Badges row (Profile) */
+.badges-grid {
+  display: grid;
+  grid-template-columns: repeat(12, 32px);
+  gap: 8px;
+  align-items: center;
+}
+.badge-mask {
+  width: 32px;
+  height: 32px;
+  background: linear-gradient(0deg, #fff, #fff);
+  border-radius: 6px; /* soften container edges */
+  filter: hue-rotate(0deg);
+  animation: hueCycle 9s linear infinite;
+}
+@keyframes hueCycle {
+  0% {
+    filter: hue-rotate(0deg);
+  }
+  100% {
+    filter: hue-rotate(360deg);
+  }
+}
+
+/* Badges dropdown list */
+.badge-row {
+  display: grid;
+  grid-template-columns: 84px 1fr; /* reserve space for 72px icon + padding */
+  gap: 12px;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+}
+
+.badge-row:last-child {
+  border-bottom: 0;
+}
+.badge-row__icon {
+  position: relative; /* container for overlay */
+  width: 56px; /* ↑ bigger */
+  height: 56px; /* ↑ bigger */
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+}
+.badge-row__img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+.badge-row__icon.locked {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+  font: 800 20px Orbitron, sans-serif;
+}
+
+.badge-row__meta .name {
+  font: 800 13px Orbitron, sans-serif;
+  margin-bottom: 2px;
+}
+.badge-row__meta .desc,
+.badge-row__meta .req,
+.badge-row__meta .date {
+  font: 600 12px Roboto, system-ui, sans-serif;
+  opacity: 0.8;
+}
+.badge-row.is-locked {
+  filter: grayscale(1) opacity(0.8);
+}
+
+/* Profile surface badges: show only earned icons, bigger */
+.pf-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+.pf-badge-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  object-fit: contain;
+}
+/* Badges modal tweaks */
+.modal-body.badges-modal {
+  display: block;
+  max-height: 65vh;
+  overflow: auto;
+}
+.badges-modal-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+}
+/* Surface badges row */
+.pf-badges-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+.pf-badge-wrap {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  overflow: hidden;
+  isolation: isolate;
+  /* stronger, clearer border */
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  /* subtle contrast ring + inner hairline */
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+/* Shared RGB sweep across the whole row/list */
+@property --rgb-shift {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+/* Animate the shift on the containers (surface row + modal list) */
+.pf-badges-row,
+.badges-modal-list {
+  --rgb-shift: 0px;
+  animation: rgbTrack 20s linear infinite; /* adjust duration to taste */
+}
+
+@keyframes rgbTrack {
+  from {
+    --rgb-shift: 0px;
+  }
+  to {
+    --rgb-shift: 600px;
+  } /* exactly one gradient period (matches background-size) */
+}
+
+/* Masked layers: white base + RGB overlay (only where PNG is opaque) */
+.pf-mask-white,
+.pf-rgb-mask {
+  position: absolute;
+  inset: 0;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  pointer-events: none;
+}
+
+/* Base = pure white (no blend!) so it’s fully visible */
+.pf-mask-white {
+  background: #fff;
+  mix-blend-mode: normal; /* <-- CRITICAL: do NOT blend the base */
+  filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
+}
+
+/* Overlay = gradient that multiplies with the white base (tints fully) */
+.pf-rgb-mask {
+  background: linear-gradient(90deg, #ff0066, #ffcc00, #33ff66, #00e5ff, #3366ff, #cc33ff, #ff0066);
+  /* fixed pixel span so color bands feel consistent across all tiles */
+  background-size: 600px 100%;
+  /* global shift minus each tile’s left offset = one continuous river */
+  background-position: calc(var(--rgb-shift) - var(--rgb-offset, 0px)) 50%;
+  mix-blend-mode: multiply;
+  opacity: 1;
+  filter: saturate(115%);
+  will-change: background-position;
+}
+
+@keyframes rgbPan {
+  from {
+    background-position: 0% 50%;
+  }
+  to {
+    background-position: 300% 50%;
+  }
+}
+
+/* Badges modal: wider card + white text */
+.modal-card {
+  width: min(640px, 92vw);
+  color: #fff;
+}
+
+/* Modal list */
+.badges-modal-list {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+/* Bigger rows + icons (64px), column sized for icon */
+.badge-row {
+  display: grid;
+  grid-template-columns: 72px 1fr; /* reserve space for 64px icon + padding */
+  gap: 12px;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px dashed rgba(255, 255, 255, 0.12);
+}
+.badge-row:last-child {
+  border-bottom: 0;
+}
+
+.badge-row__icon {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 14px;
+  overflow: hidden;
+  display: grid;
+  place-items: center;
+  isolation: isolate;
+  border: 2px solid rgba(255, 255, 255, 0.45);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.45), inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+}
+
+.badge-row__icon.locked {
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.95);
+  font: 800 22px Orbitron, sans-serif;
+}
+
+/* Modal row text */
+.badge-row__meta .name {
+  font: 800 14px Orbitron, sans-serif;
+  margin-bottom: 2px;
+}
+.badge-row__meta .desc,
+.badge-row__meta .req,
+.badge-row__meta .date {
+  font: 600 12px Roboto, system-ui, sans-serif;
+  opacity: 0.88;
+}
+.badge-row.is-locked {
+  filter: grayscale(1) opacity(0.9);
+}
+
+/* ── Badge Toast ─────────────────────────────────────────────────── */
+.toast-root {
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+  z-index: 2000;
+  pointer-events: none;
+}
+
+.toast-badge {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(22, 22, 28, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  backdrop-filter: blur(10px) saturate(130%);
+  color: #fff;
+  pointer-events: auto;
+  animation: toast-in 300ms ease, toast-out 400ms ease 3200ms forwards;
+}
+
+.toast-badge .icon {
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  flex: 0 0 auto;
+  background: #111; /* hidden if we have an actual img */
+  position: relative;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+.toast-badge .icon img {
+  width: 100%;
+  height: 100%;
+  display: block;
+  border-radius: 10px;
+}
+.toast-badge .lines {
+  display: grid;
+  line-height: 1.15;
+}
+.toast-badge .title {
+  font: 800 13px Orbitron, system-ui, sans-serif;
+  letter-spacing: 0.3px;
+}
+.toast-badge .sub {
+  font: 600 12px Roboto, system-ui, sans-serif;
+  opacity: 0.8;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+@keyframes toast-out {
+  to {
+    opacity: 0;
+    transform: translateY(-12px) scale(0.98);
+  }
+}
+
+/* Debug menu: hide via class so hotkeys & button share logic */
+#debugMenu.dm-hidden {
+  display: none !important;
+}
+/* Debug menu full-screen-ish mode */
+#debugMenu.dm-full {
+  left: 50% !important;
+  right: auto !important;
+  transform: translateX(-50%);
+  width: min(96vw, 1200px) !important;
+  max-height: 86vh !important;
+}
+/* currency images */
+.currency-img {
+  width: 35px; /* was 15px */
+  height: 35px; /* was 15px */
+  display: inline-block;
+  object-fit: contain;
+  filter: drop-shadow(0 1px 0 rgba(0, 0, 0, 0.25));
+  background: transparent;
+  border: 0 !important; /* make sure nothing frames the img */
+  border-radius: 0; /* no rounded tile behind the icon */
+  vertical-align: -2px; /* nudges icon to sit optically centered */
+}
+.shop-balances {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+}
+.shop-title {
+  font: 800 14px Orbitron, sans-serif;
+  opacity: 0.92;
+  margin: 12px 0 6px;
+}
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 10px;
+}
+.shop-card {
+  padding: 10px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+}
+.shop-card__title {
+  font: 800 13px Orbitron, sans-serif;
+  margin-bottom: 6px;
+}
+.price-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  font: 700 12px Orbitron, sans-serif;
+}
+.shop-card__actions {
+  display: flex;
+  gap: 6px;
+  margin-top: 8px;
+}
+.btn-sm {
+  font: 700 12px Orbitron, sans-serif;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+  cursor: pointer;
+}
+
+/* --- Profile: currency icons --- */
+.profile-panel .currency-strip .currency-img {
+  width: 28px;
+  height: 28px;
+  display: inline-block;
+  vertical-align: middle;
+  margin-right: 8px;
+}
+
+/* XP icon uses the PNG as a mask so we can color it via --xp-accent */
+.profile-panel .currency-strip .currency-xp {
+  -webkit-mask: url('./assets/currencies/xp.PNG') no-repeat center / contain;
+  mask: url('./assets/currencies/xp.PNG') no-repeat center / contain;
+  background: var(--xp-accent, #aef);
+}
+
+/* Level bar follows the same accent color */
+.profile-panel .level-bar .bar {
+  background: var(--xp-accent, #aef);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.05), 0 0 16px var(--xp-accent, #aef);
+}
+
+/* XP icon = masked PNG tinted by --xp-accent */
+.profile-panel .currency-strip .currency-xp {
+  /* explicit longhand for broad browser support */
+  -webkit-mask-image: url('./assets/currencies/xp.PNG');
+  mask-image: url('./assets/currencies/xp.PNG');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+
+  /* must override the base icon background */
+  background: var(--xp-accent, #aef) !important;
+}
+
+/* === Shop Orbit / Marketplace === */
+.shop-screen {
+  padding: 18px;
+}
+.shop-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 10px;
+}
+.shop-head h2 {
+  margin: 0 8px 0 0;
+}
+.shop-head .btn.back {
+  margin-left: auto;
+}
+
+.shop-currencies {
+  display: flex;
+  gap: 10px;
+  margin-left: 8px;
+}
+.curr-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid #3a3a3a;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.2));
+}
+.curr-badge img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* === SHOP (clean rebuild) ================================================== */
+
+.shop-root {
+  color: #f5f7ff;
+} /* ensure light text */
+
+.shop-screen .panel {
+  max-width: 1040px;
+}
+
+.shop-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.shop-head h2 {
+  margin: 0;
+}
+.shop-head .btn.back {
+  margin-left: auto;
+}
+
+.shop-currencies {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.curr-badge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border: 1px solid #2e2e2e;
+  border-radius: 18px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.22));
+}
+.curr-badge img {
+  width: 22px;
+  height: 22px;
+  display: block;
+}
+
+/* Orbit carousel */
+.shop-orbit {
+  position: relative;
+  margin-top: 8px;
+}
+.orbit-track {
+  display: flex;
+  gap: 0;
+  overflow: hidden;
+  padding: 0;
+  transform: translateZ(0);
+}
+.orbit-panel {
+  /* Let Shop.js set the exact width per panel */
+  flex: 0 0 auto; /* was: 0 0 100% */
+  border: 1px solid #2c2c2c;
+  border-radius: 18px;
+  padding: 12px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.25));
+  transform-style: preserve-3d;
+  will-change: transform;
+}
+.orbit-panel[data-pos='left'] {
+  transform: rotateY(8deg) translateZ(-60px);
+  filter: brightness(0.9);
+}
+.orbit-panel[data-pos='mid'] {
+  transform: rotateY(0) translateZ(0);
+}
+.orbit-panel[data-pos='right'] {
+  transform: rotateY(-8deg) translateZ(-60px);
+  filter: brightness(0.9);
+}
+
+.orbit-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  z-index: 6;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  background: #101010b0;
+  border: 1px solid #3a3a3a;
+  font-size: 22px;
+  line-height: 1;
+}
+.orbit-nav.left {
+  left: 4px;
+}
+.orbit-nav.right {
+  right: 4px;
+}
+.orbit-shadow {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -10px;
+  height: 30px;
+  background: radial-gradient(50% 100% at 50% 0%, rgba(0, 0, 0, 0.35), rgba(0, 0, 0, 0));
+  pointer-events: none;
+}
+
+.shop-section-head {
+  margin: 6px 4px 8px;
+}
+.shop-section-head h3 {
+  margin: 0;
+  font-size: 16px;
+  opacity: 0.95;
+}
+
+/* Cards */
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+  gap: 12px;
+}
+@media (min-width: 900px) {
+  .shop-grid {
+    grid-template-columns: repeat(3, minmax(220px, 1fr));
+  }
+}
+
+.shop-card {
+  border: 1px solid #303030;
+  border-radius: 14px;
+  padding: 10px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.03), rgba(0, 0, 0, 0.25));
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.shop-card.owned {
+  opacity: 0.85;
+}
+.shop-card.locked {
+  opacity: 0.6;
+}
+.shop-card-title {
+  font-weight: 600;
+  opacity: 0.95;
+}
+
+.price-pills {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.price-pill {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  border: 1px solid #3a3a3a;
+  background: #1116;
+}
+.price-pill .price-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.shop-card-actions {
+  display: flex;
+  gap: 8px;
+}
+.btn.small {
+  font-size: 12px;
+  padding: 5px 10px;
+}
+.btn.small.buy.denied {
+  animation: shake 0.36s;
+}
+@keyframes shake {
+  10%,
+  90% {
+    transform: translateX(-1px);
+  }
+  20%,
+  80% {
+    transform: translateX(2px);
+  }
+  30%,
+  50%,
+  70% {
+    transform: translateX(-4px);
+  }
+  40%,
+  60% {
+    transform: translateX(4px);
+  }
+}
+.lock-note {
+  font-size: 12px;
+  opacity: 0.75;
+}
+
+/* Ensure the Shop uses the UI foreground color (white in your theme) */
+.shop-root,
+.shop-root .panel {
+  color: var(--ui-fg, #fff);
+}
+
+/* Currency pills + price chips look crisp on dark bg */
+.shop-root .curr-badge img,
+.shop-root .price-pill .price-icon {
+  display: inline-block;
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+}
+
+/* === Shop Orbit / Marketplace === */
+/* Give the carousel a little inner padding so the panel border never kisses the container edge */
+.shop-root .shop-orbit {
+  position: relative;
+  overflow: hidden;
+  /* keep dots comfortably inside the rounded container */
+  padding: 8px 8px 72px; /* top | sides | bottom */
+}
+.shop-root .orbit-track {
+  display: flex;
+  will-change: transform;
+  padding: 0; /* ← no horizontal padding */
+  overflow: hidden; /* keep slides clipped correctly */
+}
+.shop-root .curr-badge .val {
+  min-width: 5ch;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+/* Each panel should include its border/padding in width calculations
+   and have a tiny horizontal margin to prevent visual "clipping". */
+.shop-root .orbit-panel {
+  box-sizing: border-box;
+  margin: 0;
+  min-height: 360px; /* <— add: visible body even when a section is empty */
+  display: flex;
+  flex-direction: column;
+}
+.shop-root .orbit-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  font: 700 22px Orbitron, sans-serif;
+  color: #fff;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 12px;
+  width: 36px;
+  height: 36px;
+  cursor: pointer;
+  z-index: 2;
+  backdrop-filter: blur(6px);
+}
+.shop-root .orbit-nav.left {
+  left: 8px;
+}
+.shop-root .orbit-nav.right {
+  right: 8px;
+}
+.shop-root .orbit-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+/* Cards = marketplace vibes */
+.shop-root .shop-card {
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 14px;
+  padding: 10px;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;
+}
+.shop-root .shop-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+  border-color: rgba(255, 255, 255, 0.25);
+}
+.shop-root .shop-card.owned {
+  opacity: 0.7;
+}
+.shop-root .shop-card.locked {
+  filter: grayscale(0.6) brightness(0.9);
+}
+
+/* Headline + grid */
+.shop-root .shop-section-head h3 {
+  margin: 6px 0 10px;
+  font: 800 18px Orbitron, sans-serif;
+  letter-spacing: 0.5px;
+}
+.shop-root .shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 12px;
+}
+
+/* Currency row in header */
+.shop-root .shop-currencies {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-left: auto;
+}
+.shop-root .curr-badge {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  padding: 6px 8px;
+  border-radius: 999px;
+}
+.shop-root .curr-badge img {
+  width: 16px;
+  height: 16px;
+}
+
+/* Price chips */
+.shop-root .price-pills {
+  display: flex;
+  gap: 8px;
+  margin: 6px 0 10px;
+}
+.shop-root .price-pill {
+  display: inline-flex;
+  gap: 6px;
+  align-items: center;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 4px 8px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.shop-root .price-pill .price-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Subtle panel vignette for depth */
+.shop-root .orbit-shadow {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(120% 70% at 50% 50%, transparent 40%, rgba(0, 0, 0, 0.25) 100%);
+}
+
+/* Orbit pager dots (iOS-style) */
+.shop-root .orbit-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 6px;
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  pointer-events: auto;
+}
+.shop-root .orbit-dots .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.28);
+  border: 1px solid rgba(255, 255, 255, 0.32);
+  transform: scale(0.9);
+  transition: transform 0.18s ease, background 0.18s ease, border-color 0.18s ease;
+  cursor: pointer;
+}
+.shop-root .orbit-dots .dot.is-active {
+  background: #fff;
+  border-color: #fff;
+  transform: scale(1.2);
+}
+.shop-root .orbit-dots .dot:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #9cf;
+}
+/* Challenges CTA + empty placeholders */
+.shop-root .shop-card--challenges {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  background: linear-gradient(180deg, rgba(120, 200, 255, 0.08), rgba(0, 0, 0, 0.2));
+  border: 1px solid rgba(120, 200, 255, 0.28);
+}
+
+.shop-root .shop-card--empty {
+  opacity: 0.9;
+}
+
+.shop-root .shop-empty-note {
+  font-size: 12px;
+  opacity: 0.75;
+  margin: 2px 0 6px;
+}
+
+/* Pager row lives at bottom center; arrows flank the dots.
+   JS will place the arrows based on actual dot width. */
+.shop-root .orbit-dots {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 22px; /* keep it comfortably above the rounded panel corner */
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  pointer-events: auto;
+}
+
+/* Arrows are positioned by JS; keep them optically centered baseline */
+.shop-root .shop-orbit .orbit-nav {
+  top: auto !important;
+  bottom: 6px !important;
+  transform: none !important;
+  z-index: 3;
+  left: 50%; /* JS overwrites left to flank the dots */
+  right: auto !important;
+}
+
+/* Shop header subtitle (e.g., “Shop — Skins”) */
+.shop-head .shop-titlewrap {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+.shop-head .shop-sub {
+  font: 700 14px Orbitron, sans-serif;
+  opacity: 0.85;
+}
+.shop-root .orbit-dots {
+  bottom: 22px;
+}
+
+/* ── Shop: tag chips / badges ───────────────────────────────────────────── */
+.tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin: 2px 0 2px;
+}
+.tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  font: 700 10px Orbitron, system-ui, sans-serif;
+  letter-spacing: 0.08em;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  opacity: 0.95;
+}
+
+/* Variants (add more as you start using them) */
+.tag--new {
+  background: rgba(120, 200, 255, 0.14);
+  border-color: rgba(120, 200, 255, 0.38);
+}
+.tag--sale {
+  background: rgba(255, 120, 120, 0.14);
+  border-color: rgba(255, 120, 120, 0.38);
+}
+.tag--rare {
+  background: rgba(180, 140, 255, 0.14);
+  border-color: rgba(180, 140, 255, 0.38);
+}
+.tag--limited,
+.tag--weekly {
+  background: rgba(255, 210, 120, 0.14);
+  border-color: rgba(255, 210, 120, 0.38);
+}
+.tag--consumable {
+  background: rgba(160, 255, 160, 0.12);
+  border-color: rgba(160, 255, 160, 0.32);
+}
+
+/* Card polish so tags/price/CTAs breathe nicely */
+.shop-card-title {
+  font: 800 13px Orbitron, system-ui, sans-serif;
+  letter-spacing: 0.2px;
+  margin-bottom: 2px;
+}
+.shop-card .price-pills {
+  margin-top: 2px;
+}
+.shop-card-actions .btn.small {
+  min-width: 72px;
+  justify-content: center;
+}
+.shop-card.owned .btn.small.buy[disabled] {
+  opacity: 0.8;
+  cursor: default;
+}
+
+/* Shop header: XP icon = masked PNG, tinted by --xp-accent (same as Profile) */
+.shop-root .curr-badge[data-type='xp'] .xp-mask {
+  width: 22px;
+  height: 22px;
+  display: inline-block;
+  vertical-align: -2px;
+  /* use PNG as mask so we can color it via CSS var */
+  -webkit-mask-image: url('./assets/currencies/xp.PNG');
+  mask-image: url('./assets/currencies/xp.PNG');
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+  background: var(--xp-accent, #aef);
+}
+
+/* ─────────────────────────────────────────────────────────────
+   SHOP: center currency pills in the header + XP color
+   ───────────────────────────────────────────────────────────── */
+.shop-root .panel-header.shop-head {
+  position: relative; /* anchor for absolute centering */
+  min-height: 54px; /* ensure enough room for the pills */
+}
+
+.shop-root .shop-titlewrap {
+  position: relative;
+  z-index: 1; /* keep title above the header bg */
+}
+
+/* Absolutely center the currency cluster regardless of its width */
+.shop-root .shop-currencies {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  top: 6px; /* nudge down if needed */
+  display: inline-flex;
+  gap: 12px;
+  align-items: center;
+  white-space: nowrap;
+  pointer-events: none; /* pills aren’t interactive; don't block Back/title */
+}
+
+.shop-root .shop-currencies .curr-badge {
+  pointer-events: auto; /* allow copy/select if you want */
+}
+
+/* Icon sizing inside pills (copper/iridium use <img>, XP uses a mask span) */
+.shop-root .shop-currencies img,
+.shop-root .shop-currencies .xp-mask {
+  width: 18px;
+  height: 18px;
+  margin-right: 6px;
+  vertical-align: -3px;
+}
+
+/* XP icon: same tinted look as Profile via a mask */
+.shop-root .shop-currencies .xp-mask {
+  display: inline-block;
+  background: linear-gradient(180deg, #d9f1ff 0%, #59b9ff 100%);
+  -webkit-mask: url('./assets/currencies/xp.PNG') no-repeat 50% 50% / contain;
+  mask: url('./assets/currencies/xp.PNG') no-repeat 50% 50% / contain;
+  filter: drop-shadow(0 0 1px rgba(89, 185, 255, 0.6));
+}
+
+.shop-section-head {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 10px 12px 6px;
+}
+.shop-section-head h3 {
+  margin: 0;
+  font-size: 22px;
+  letter-spacing: 0.02em;
+  opacity: 0.9;
+}
+
+.shop-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 14px;
+  padding: 8px 12px 16px;
+}
+.shop-card--empty,
+.shop-card--challenges {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-start;
+}
+.shop-empty-note {
+  opacity: 0.75;
+  font-size: 13px;
+  margin: 8px 0 0;
+}
+
+/* Make a menu card span the full grid width (used by Jukebox) */
+.menu-grid .menu-card--wide {
+  grid-column: 1 / -1;
+}
+
+/* Simple Jukebox scaffolding that matches your translucent panels */
+.screen--jukebox .section-shell {
+  padding: 12px 16px 0;
+}
+.screen--jukebox .section-panel {
+  border-radius: 14px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(12, 12, 12, 0.35);
+  box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.03);
+}
+.screen--jukebox .section-panel__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px 8px;
+}
+.screen--jukebox .section-title {
+  font-size: 22px;
+  letter-spacing: 0.5px;
+}
+.screen--jukebox .jukebox-tabs {
+  display: flex;
+  gap: 8px;
+}
+.screen--jukebox .jukebox-tabs .tab {
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  background: rgba(255, 255, 255, 0.06);
+  color: #fff;
+}
+.screen--jukebox .jukebox-tabs .tab.is-active {
+  background: rgba(255, 255, 255, 0.12);
+}
+.screen--jukebox .section-panel__body {
+  padding: 12px 16px 16px;
+  min-height: 280px;
+}
+.screen--jukebox .jukebox-placeholder {
+  opacity: 0.8;
+  font-size: 14px;
+}
+
+/* === Foil overlay for badges (seamless, holo) ========================= */
+.pf-foil-mask {
+  position: absolute;
+  inset: 0;
+
+  /* Mask = badge PNG (set inline in Profile.js) */
+  -webkit-mask-repeat: no-repeat;
+  mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  mask-position: center;
+  -webkit-mask-size: contain;
+  mask-size: contain;
+
+  /* Four backgrounds:
+     1) fine bump tile (L→R)
+     2) larger bump tile (R→L)
+     3) prism interference tile (L→R)
+     4) narrow white glint sweep
+  */
+  background-image: url('./assets/textures/foil_bump_tile.png'),
+    url('./assets/textures/foil_bump_tile.png'), url('./assets/textures/foil_prism_tile.png'),
+    linear-gradient(
+      120deg,
+      rgba(255, 255, 255, 0) 46%,
+      rgba(255, 255, 255, 0.95) 50%,
+      rgba(255, 255, 255, 0) 54%
+    );
+
+  background-repeat: repeat, repeat, repeat, no-repeat;
+
+  /* IMPORTANT: sizes match the distances we animate in @keyframes */
+  background-size: 384px 384px, /* layer 1 tile size */ 640px 640px,
+    /* layer 2 tile size (different scale avoids patterning) */ 512px 512px,
+    /* prism tile size */ 800% 100%; /* glint width; wide so it feels long */
+
+  /* Start positions */
+  background-position: 0 0, /* layer 1 */ 0 0, /* layer 2 */ 0 0, /* prism */ -200% 0; /* glint starts off-left */
+
+  /* Internal layer blends (inside this element) */
+  background-blend-mode: overlay, /* bump adds highlights/shadows without washing color */ overlay,
+    color-dodge, /* prism adds iridescent pop */ screen; /* glint streak on top */
+
+  /* Blend against the RGB-tinted base below */
+  mix-blend-mode: overlay;
+
+  /* Overall strength (tweak if you want more/less foil) */
+  opacity: 0.28;
+  filter: contrast(1.08) saturate(1.06);
+
+  /* One loop that scrolls each tile exactly one period → no snapping */
+  animation: foilStream 28s linear infinite;
+  will-change: background-position;
+}
+@keyframes foilStream {
+  from {
+    background-position: 0 0, /* bump 384px tile (L→R) */ 0 0, /* bump 640px tile (R→L) */ 0 0,
+      /* prism 512px tile (L→R) */ -200% 0; /* glint off-left */
+  }
+  to {
+    background-position: 384px 0, /* +1 exact tile → seamless */ -640px 0,
+      /* -1 exact tile → seamless */ 512px 0, /* +1 exact tile → seamless */ 120% 0; /* glint crosses and exits */
+  }
+}

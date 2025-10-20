@@ -1,0 +1,33 @@
+{
+  "Shape v2": {
+    "prefix": "new-shape",
+    "body": [
+      "/* @ts-check */",
+      "export const meta = Object.freeze({",
+      "  id: \"$1\",",
+      "  displayName: \"$2\",",
+      "  color: \"$3\",",
+      "  behaviorType: \"trace\",",
+      "  flags: { usesEdgeVeils: false, needsTimer: true, usesOverlay: false, reducedMotionOk: true },",
+      "  timings: { introMs: 600, glintMs: 300, expectedMs: 20000 },",
+      "  assets: [],",
+      "  version: 2",
+      "});",
+      "",
+      "/** @param {import('../../types/shapes').ShapeCtx} ctx */",
+      "export function create(ctx) {",
+      "  let ready = false, done = false;",
+      "  return {",
+      "    onStart(){",
+      "      if (meta.flags.needsTimer) ctx.timer.pause();",
+      "      ctx.defer(meta.timings.introMs, ()=>{ ready = true; if (meta.flags.needsTimer) ctx.timer.resume(); });",
+      "    },",
+      "    update(dt){ if (!ready || done) return; /* ... */ },",
+      "    isReadyToPlay(){ return ready; },",
+      "    onComplete(){ ctx.veils.finish?.(); },",
+      "    draw(g){}",
+      "  }",
+      "}"
+    ]
+  }
+}
